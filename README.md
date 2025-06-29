@@ -1,1 +1,1 @@
-# server-in-rust
+# server-in-rust (single-threaded)
