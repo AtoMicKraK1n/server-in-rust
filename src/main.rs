@@ -203,7 +203,7 @@ async fn sign_message(req_body: web::Json<SignMessageRequest>) -> impl Responder
 async fn main() -> std::io::Result<()> {
     println!("Starting Solana Keypair Generator Server on http://127.0.0.1:8080");
     HttpServer::new(|| App::new().service(gen_keypair).service(sign_message).service(create_token).service(mint_token))
-        .bind(("127.0.0.1", 8080))?
+        .bind(("0.0.0.0", 4000))?
         .run()
         .await
 }
