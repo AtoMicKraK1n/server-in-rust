@@ -3,16 +3,283 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>rustacean</title>
+    <title>Solana Balance Server (single-threaded) | Rustacean</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 40px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 40px;
+      }
+
+      .api-section {
+        margin-bottom: 40px;
+      }
+
+      .api-section h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+      }
+
+      .endpoint {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .endpoint:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .endpoint-title {
+        color: #27ae60;
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+      }
+
+      .endpoint-url {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+        margin: 10px 0;
+        word-break: break-all;
+      }
+
+      .try-button {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .try-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 10px rgba(52, 152, 219, 0.3);
+      }
+
+      .input-group {
+        margin: 15px 0;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #bdc3c7;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        font-family: "Courier New", monospace;
+      }
+
+      .response-area {
+        margin-top: 15px;
+        padding: 15px;
+        background: #ecf0f1;
+        border-radius: 5px;
+        min-height: 50px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        display: none;
+      }
+
+      .footer {
+        background: #2c3e50;
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .footer a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      .rust-badge {
+        display: inline-block;
+        background: #ce422b;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        margin-left: 10px;
+      }
+    </style>
   </head>
   <body>
-    <div class="card">
-      <h1>Made a Server in RUST</h1>
-      <p>for Superdevs Assignment</p>
-      <p>Made By <strong>Prakhar Sharma</strong></p>
-      <p>
-        <a href="https://x.com/Prakhar158" target="_blank">x.com/Prakhar158</a>
-      </p>
+    <div class="container">
+      <div class="header">
+        <h1>🦀 Solana Balance Server (single threaded)</h1>
+        <p>
+          Built with Rust for Superdevs Assignment
+          <span class="rust-badge">RUST</span>
+        </p>
+      </div>
+
+      <div class="content">
+        <div class="api-section">
+          <div class="endpoint">
+            <div class="endpoint-title">Get Solana Account Balance</div>
+            <div class="endpoint-url">GET /balance/{pubkey}</div>
+            <p>
+              Fetches the balance of a Solana account from
+              <strong>Devnet</strong>.
+            </p>
+
+            <div class="input-group">
+              <label for="pubkey-input">Solana Public Key:</label>
+              <input type="text" id="pubkey-input" />
+            </div>
+
+            <button class="try-button" onclick="fetchBalance()">
+              🚀 Try It Out
+            </button>
+
+            <div id="response-area" class="response-area"></div>
+          </div>
+        </div>
+
+        <div class="api-section"></div>
+      </div>
+
+      <div class="footer">
+        <p>Made by <strong>Prakhar Sharma</strong></p>
+        <p>
+          <a href="https://x.com/Prakhar158" target="_blank">@Prakhar158</a>
+        </p>
+        <p>
+          <a
+            href="https://docs.rs/solana-account-balance/latest/src/solana_account_balance/lib.rs.html#1-106"
+            target="_blank"
+            >Resources Used (solana-account-balance)</a
+          >
+        </p>
+        <p>
+          <a
+            href="https://doc.rust-lang.org/book/ch21-01-single-threaded.html"
+            target="_blank"
+            >Resources Used (single threaded server)</a
+          >
+        </p>
+        <p>
+          <a href="https://youtu.be/BHxmWTVFWxQ" target="_blank"
+            >Resources Used (lets get rusty)</a
+          >
+        </p>
+      </div>
     </div>
+
+    <script>
+      async function fetchBalance() {
+        const pubkey = document.getElementById("pubkey-input").value.trim();
+        const responseArea = document.getElementById("response-area");
+
+        if (!pubkey) {
+          responseArea.style.display = "block";
+          responseArea.textContent = "Please enter a valid pubkey";
+          responseArea.style.background = "#e74c3c";
+          responseArea.style.color = "white";
+          return;
+        }
+
+        responseArea.style.display = "block";
+        responseArea.style.background = "#f39c12";
+        responseArea.style.color = "white";
+        responseArea.textContent = "⏳ Fetching balance...";
+
+        try {
+          const response = await fetch(`/balance/${pubkey}`);
+          const data = await response.text();
+
+          if (response.ok) {
+            responseArea.style.background = "#27ae60";
+            responseArea.style.color = "white";
+            responseArea.textContent =
+              "✅ Success!\n\n" + JSON.stringify(JSON.parse(data), null, 2);
+          } else {
+            responseArea.style.background = "#e74c3c";
+            responseArea.style.color = "white";
+            responseArea.textContent = "❌ Error!\n\n" + data;
+          }
+        } catch (error) {
+          responseArea.style.background = "#e74c3c";
+          responseArea.style.color = "white";
+          responseArea.textContent = "❌ Network Error!\n\n" + error.message;
+        }
+      }
+      document
+        .getElementById("pubkey-input")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            fetchBalance();
+          }
+        });
+    </script>
   </body>
 </html>
